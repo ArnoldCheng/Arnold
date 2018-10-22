@@ -1,0 +1,18 @@
+===2018-10-11 02:14:31.647 INFO  cn.zzh.foreground_client.ForegroundClientApplicationTests Line:680 - No active profile set, falling back to default profiles: default
+===2018-10-11 02:14:33.800 INFO  com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure Line:56  - Init DruidDataSource
+===2018-10-11 02:14:34.927 INFO  com.alibaba.druid.pool.DruidDataSource Line:930 - {dataSource-1} inited
+===2018-10-11 02:14:35.995 INFO  com.netflix.config.sources.URLConfigurationSource Line:122 - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+===2018-10-11 02:14:36.010 INFO  com.netflix.config.sources.URLConfigurationSource Line:122 - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+===2018-10-11 02:14:38.501 INFO  cn.zzh.foreground_client.ForegroundClientApplicationTests Line:59  - Started ForegroundClientApplicationTests in 10.109 seconds (JVM running for 12.887)
+===2018-10-11 02:14:38.979 INFO  cn.zzh.foreground_client.ForegroundClientApplicationTests Line:27  - User{id=1, serialId='null', phoneNumber='null', idCard='null', realName='null', isLocaked=null, isNoob=null, password='s', salt='null', balance=null, profit=null, createdAt=null, updatedAt=null}
+
+===2018-10-11 02:14:39.043 INFO  com.alibaba.druid.pool.DruidDataSource Line:1825 - {dataSource-1} closed
+===2018-10-11 02:15:06.615 INFO  cn.zzh.foreground_client.ForegroundClientApplicationTests Line:680 - No active profile set, falling back to default profiles: default
+===2018-10-11 02:15:09.153 INFO  com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure Line:56  - Init DruidDataSource
+===2018-10-11 02:15:10.518 INFO  com.alibaba.druid.pool.DruidDataSource Line:930 - {dataSource-1} inited
+===2018-10-11 02:15:11.632 INFO  com.netflix.config.sources.URLConfigurationSource Line:122 - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+===2018-10-11 02:15:11.649 INFO  com.netflix.config.sources.URLConfigurationSource Line:122 - To enable URLs as dynamic configuration sources, define System property archaius.configurationSource.additionalUrls or make config.properties available on classpath.
+===2018-10-11 02:15:14.336 INFO  cn.zzh.foreground_client.ForegroundClientApplicationTests Line:59  - Started ForegroundClientApplicationTests in 11.069 seconds (JVM running for 13.822)
+===2018-10-11 02:15:14.661 INFO  cn.zzh.foreground_client.ForegroundClientApplicationTests Line:27  - User{id=1, serialId='null', phoneNumber='null', idCard='null', realName='null', isLocaked=null, isNoob=null, password='s', salt='null', balance=null, profit=null, createdAt=null, updatedAt=null}
+
+===2018-10-11 02:15:14.713 INFO  com.alibaba.druid.pool.DruidDataSource Line:1825 - {dataSource-1} closed

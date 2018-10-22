@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zzh.foreground_client.project.dao.ProductMapper">
+  <resultMap id="BaseResultMap" type="cn.zzh.foreground_client.project.entity.Product">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="serial_id" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="product_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="product_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="pro_profit" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="investment_cycle" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <arg column="min_amout" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="max_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="repayment_way" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="status" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <arg column="is_shelves" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <arg column="more_information" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="thumnail" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="created_by" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="updated_by" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="created_at" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="updated_at" javaType="java.lang.Long" jdbcType="BIGINT" />
+    </constructor>
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="cn.zzh.foreground_client.project.entity.Product">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="serial_id" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="product_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="product_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="pro_profit" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="investment_cycle" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <arg column="min_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="max_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <arg column="repayment_way" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="status" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <arg column="is_shelves" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <arg column="more_information" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="thumnail" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="created_by" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="updated_by" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="created_at" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="updated_at" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="product_intro" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+    </constructor>
+  </resultMap>
+
+
+  <resultMap id="NormalProduct" type="cn.zzh.foreground_client.project.entity.Product">
+      <result property="id" column="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <result property="serialId" column="serial_id" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <result property="productName" column="product_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <result property="productType" column="product_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <result property="proProfit" column="pro_profit" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <result property="investmentCycle" column="investment_cycle" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <result property="minAmount" column="min_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <result property="maxAmount" column="max_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />
+      <result property="repaymentWay" column="repayment_way" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <result property="status" column="status" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <result property="isShelves" column="is_shelves" javaType="java.lang.Integer" jdbcType="TINYINT" />
+      <result property="moreInformation" column="more_information" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <result property="thumnail" column="thumnail" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <result property="productIntro" column="product_intro" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+  </resultMap>
+
+
+
+  <sql id="Base_Column_List">
+
+    id, serial_id, product_name, product_type, pro_profit, investment_cycle, min_amout, 
+    max_amount, repayment_way, status, is_shelves, more_information, thumnail, created_by, 
+    updated_by, created_at, updated_at
+  </sql>
+  <sql id="Blob_Column_List">
+    product_intro
+  </sql>
+
+  <select id="selectSelective"  resultMap="ResultMapWithBLOBs">
+    select * from product
+    <where>
+      <if test="id!=null">
+        id =#{id,jdbcType=BIGINT}
+      </if>
+      <if test="serialId != null">
+       and  serial_id = #{serialId,jdbcType=VARCHAR}
+      </if>
+      <if test="productName != null">
+        and   product_name = #{productName,jdbcType=VARCHAR}
+      </if>
+      <if test="productType != null">
+        and  product_type = #{productType,jdbcType=INTEGER}
+      </if>
+      <if test="proProfit != null">
+        and  pro_profit = #{proProfit,jdbcType=DECIMAL}
+      </if>
+      <if test="investmentCycle != null">
+        and  investment_cycle = #{investmentCycle,jdbcType=TINYINT}
+      </if>
+      <if test="minAmout != null">
+        and   min_amout = #{minAmout,jdbcType=DECIMAL}
+      </if>
+      <if test="maxAmount != null">
+        and   max_amount = #{maxAmount,jdbcType=DECIMAL}
+      </if>
+      <if test="repaymentWay != null">
+        and   repayment_way = #{repaymentWay,jdbcType=VARCHAR}
+      </if>
+      <if test="status != null">
+        and   status = #{status,jdbcType=TINYINT}
+      </if>
+      <if test="isShelves != null">
+        and  is_shelves = #{isShelves,jdbcType=TINYINT}
+      </if>
+
+      <if test="createdBy != null">
+        and  created_by = #{createdBy,jdbcType=VARCHAR}
+      </if>
+      <if test="updatedBy != null">
+        and  updated_by = #{updatedBy,jdbcType=VARCHAR}
+      </if>
+      <if test="createdAt != null">
+        and  created_at = #{createdAt,jdbcType=BIGINT}
+      </if>
+      <if test="updatedAt != null">
+        and  updated_at = #{updatedAt,jdbcType=BIGINT}
+      </if>
+    </where>
+  </select>
+</mapper>

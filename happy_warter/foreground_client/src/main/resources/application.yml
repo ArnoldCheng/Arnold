@@ -1,0 +1,52 @@
+
+server:
+  port: 8080
+spring:
+  application:
+    name: eureka-client
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+    jedis:
+      pool:
+        min-idle: 10
+        max-active: 20
+        max-idle: 5
+
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/happy_water?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: mysql
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+       initial-size: 1
+       max-active: 20
+       min-idle: 3
+       max-wait: 60000
+       pool-prepared-statements: false
+       test-on-borrow: false
+       test-while-idle: true
+       time-between-eviction-runs-millis: 30000
+       max-pool-prepared-statement-per-connection-size: 20
+       validation-query: SELECT 'X'
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1111/eureka/
+
+mybatis:
+  mapper-locations: classpath:mybatis-mapper/*.xml
+  type-aliases-package: cn.zzh.foreground_client.project.entity
+
+
+#logging:
+#  path: /Users/a1/Downloads/logback
+

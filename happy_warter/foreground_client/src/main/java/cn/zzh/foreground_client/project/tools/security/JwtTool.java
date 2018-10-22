@@ -1,0 +1,105 @@
+package cn.zzh.foreground_client.project.tools.security;
+
+/**
+ * @Author: 快乐水 青柠可乐
+ * @Description:
+ * @Date: Created in 上午10:41 2018/10/18
+ * @Modified By:
+ */
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.alibaba.druid.util.StringUtils;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
+
+public class JwtTool {
+    /**
+     * APP登录Token的生成和解析
+     *
+     */
+
+    /** token秘钥，请勿泄露，请勿随便修改 backups:JKKLJOoasdlfj */
+    private static final String SECRET = "JKKLJOoasdlfj";
+    /** token 过期时间: 10天 */
+    private static final int CALENDAR_FIELD = Calendar.DATE;
+    private static final int CALENDAR_INTERVAL = 10;
+
+    /**
+     * JWT生成Token.<br/>
+     *
+     * JWT构成: header, payload, signature
+     *
+     * @param user_id
+     *            登录成功后用户user_id, 参数user_id不可传空
+     */
+    public static String createToken(Long user_id) throws Exception {
+        Date iatDate = new Date();
+        // expire time
+        Calendar nowTime = Calendar.getInstance();
+        nowTime.add(CALENDAR_FIELD, CALENDAR_INTERVAL);
+        Date expiresDate = nowTime.getTime();
+
+        // header Map
+        Map<String, Object> map = new HashMap<>();
+        map.put("alg", "HS256");
+        map.put("typ", "JWT");
+
+        // build token
+        // param backups {iss:Service, aud:APP}
+
+        // header
+        String token = JWT.create().withHeader(map)
+                // payload
+                .withClaim("iss", "Service")
+                .withClaim("aud", "APP").withClaim("user_id", null == user_id ? null : user_id.toString())
+                // sign time
+                .withIssuedAt(iatDate)
+                // expire time
+                .withExpiresAt(expiresDate)
+                // signature
+                .sign(Algorithm.HMAC256(SECRET));
+
+        return token;
+    }
+
+    /**
+     * 解密Token
+     *
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    public static Map<String, Claim> verifyToken(String token) {
+        DecodedJWT jwt = null;
+        try {
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(SECRET)).build();
+            jwt = verifier.verify(token);
+        } catch (Exception e) {
+             e.printStackTrace();
+            // token 校验失败, 抛出Token验证非法异常
+        }
+        return jwt.getClaims();
+    }
+
+    /**
+     * 根据Token获取user_id
+     *
+     * @param token
+     * @return user_id
+     */
+    public static Long getAppUID(String token) {
+        Map<String, Claim> claims = verifyToken(token);
+        Claim user_id_claim = claims.get("user_id");
+        if (null == user_id_claim || StringUtils.isEmpty(user_id_claim.asString())) {
+            // token 校验失败, 抛出Token验证非法异常
+        }
+        return Long.valueOf(user_id_claim.asString());
+    }
+}
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.zzh.foreground_client.project.dao.BannerMapper" >
+  <resultMap id="BaseResultMap" type="cn.zzh.foreground_client.project.entity.Banner" >
+    <constructor >
+      <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="serial_id" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="title" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="thumnail" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="interval_time" jdbcType="TINYINT" javaType="java.lang.Byte" />
+      <arg column="status" jdbcType="TINYINT" javaType="java.lang.Integer" />
+      <arg column="created_by" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="updated_by" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="created_at" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="updated_at" jdbcType="BIGINT" javaType="java.lang.Long" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, serial_id, title, thumnail, interval_time, status, created_by, updated_by, created_at,
+    updated_at
+  </sql>
+</mapper>

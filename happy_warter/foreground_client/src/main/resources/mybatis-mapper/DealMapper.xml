@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.zzh.foreground_client.project.dao.DealMapper" >
+  <resultMap id="MapDealAndProduct" type="cn.zzh.foreground_client.project.entity.Deal" >
+    <id property="id" column="id" jdbcType="BIGINT" javaType="java.lang.Long" />
+    <result property="serialId" column="serial_id" jdbcType="VARCHAR" javaType="java.lang.String" />
+    <result property="userId" column="user_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+    <result property="productId" column="product_id" jdbcType="BIGINT" javaType="java.lang.Long" />
+    <result property="investment" column="investment" jdbcType="DECIMAL" javaType="java.math.BigDecimal" />
+    <result property="profit" column="profit" jdbcType="DECIMAL" javaType="java.math.BigDecimal" />
+    <result property="dealingType" column="dealing_type" jdbcType="INTEGER" javaType="java.lang.Integer" />
+    <result property="createdAt" column="created_at" jdbcType="BIGINT" javaType="java.lang.Long" />
+    <result property="updated_at" column="updated_at" jdbcType="BIGINT" javaType="java.lang.Long" />
+    <association javaType="cn.zzh.foreground_client.project.entity.Product"
+                 property="product" column="product_id"
+                 select="cn.zzh.foreground_client.project.dao.ProductMapper.selectForCompact"/>
+
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, serial_id, user_id, product_id, investment, profit, dealing_type, created_at, 
+    updated_at
+  </sql>
+
+
+  <insert id="insertSelective" parameterType="cn.zzh.foreground_client.project.entity.Deal" >
+    insert into deal
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="serialId != null" >
+        serial_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="productId != null" >
+        product_id,
+      </if>
+      <if test="investment != null" >
+        investment,
+      </if>
+      <if test="profit != null" >
+        profit,
+      </if>
+      <if test="dealingType != null" >
+        dealing_type,
+      </if>
+      <if test="createdAt != null" >
+        created_at,
+      </if>
+      <if test="updatedAt != null" >
+        updated_at,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="serialId != null" >
+        #{serialId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="productId != null" >
+        #{productId,jdbcType=BIGINT},
+      </if>
+      <if test="investment != null" >
+        #{investment,jdbcType=DECIMAL},
+      </if>
+      <if test="profit != null" >
+        #{profit,jdbcType=DECIMAL},
+      </if>
+      <if test="dealingType != null" >
+        #{dealingType,jdbcType=INTEGER},
+      </if>
+      <if test="createdAt != null" >
+        #{createdAt,jdbcType=BIGINT},
+      </if>
+      <if test="updatedAt != null" >
+        #{updatedAt,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>
