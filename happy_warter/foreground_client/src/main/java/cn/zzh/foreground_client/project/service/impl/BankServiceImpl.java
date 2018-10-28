@@ -38,4 +38,9 @@ public class BankServiceImpl implements BankService {
     public int insertSelective(Bank bank) {
         return bankMapper.insertSelective(bank);
     }
+
+    @Override
+    public long selectUserIdByBankId(long bankId) {
+        return bankMapper.selectUserIdByBankId(bankId);
+    }
 }

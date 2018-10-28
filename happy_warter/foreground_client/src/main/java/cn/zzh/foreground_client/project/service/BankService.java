@@ -36,4 +36,7 @@ public interface BankService {
      */
     int insertSelective(Bank bank);
 
+
+    long selectUserIdByBankId(long bankId);
+
 }

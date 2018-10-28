@@ -5,10 +5,11 @@ import cn.zzh.foreground_client.project.entity.Product;
 import cn.zzh.foreground_client.project.entity.Result;
 import cn.zzh.foreground_client.project.service.BannerService;
 import cn.zzh.foreground_client.project.service.ProductService;
-import cn.zzh.foreground_client.project.service.UserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -22,11 +23,9 @@ import java.util.List;
  *
  */
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping(value = "/o/user")
 public class UserHome {
 
-    @Autowired
-    private UserService userService;
     @Autowired
     private BannerService bannerService;
     @Autowired
@@ -42,7 +41,7 @@ public class UserHome {
      *
      */
     @RequestMapping(value = "/home/banner", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
-    public Result<List<Banner>> homeGetBanner(@RequestParam(value = "id", required = false) Long id) {
+    public Result<List<Banner>> homeGetBanner(@RequestParam(value = "id", required = false) long id) {
         return new Result<>(true,bannerService.selectByStatus(1));
     }
     /**9：首页 2

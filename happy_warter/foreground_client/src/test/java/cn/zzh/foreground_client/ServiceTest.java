@@ -1,4 +1,5 @@
 package cn.zzh.foreground_client;
+
 import cn.zzh.foreground_client.project.service.Tools;
 import cn.zzh.foreground_client.project.service.impl.ToolsImpl;
 import cn.zzh.foreground_client.project.service.impl.UserServiceImpl;
@@ -10,10 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Author: 快乐水 青柠可乐

@@ -6,7 +6,8 @@ spring:
     name: eureka-client
   redis:
     database: 0
-    host: 127.0.0.1
+#    host: 127.0.0.1
+    host: 123.207.41.229
     port: 6379
     password:
     jedis:
@@ -18,6 +19,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/happy_water?useUnicode=true&characterEncoding=utf-8
+#    url: jdbc:mysql://172.18.213.98:3306/happy_water?useUnicode=true&characterEncoding=utf-8
     username: root
     password: mysql
     type: com.alibaba.druid.pool.DruidDataSource
@@ -40,7 +42,12 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:1111/eureka/
+      defaultZone: http://123.207.41.229:1111/eureka/
+#      defaultZone: http://localhost:1111/eureka/
+  instance:
+    preferIpAddress: true
+    ip-address: 47.106.157.64
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
 
 mybatis:
   mapper-locations: classpath:mybatis-mapper/*.xml

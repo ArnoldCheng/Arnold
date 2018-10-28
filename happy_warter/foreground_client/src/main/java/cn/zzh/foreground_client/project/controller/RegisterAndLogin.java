@@ -4,11 +4,16 @@ import cn.zzh.foreground_client.project.entity.Result;
 import cn.zzh.foreground_client.project.entity.User;
 import cn.zzh.foreground_client.project.service.Tools;
 import cn.zzh.foreground_client.project.service.UserService;
-import cn.zzh.foreground_client.project.tools.security.JwtTool;
+import cn.zzh.foreground_client.project.tools.redis.Redis;
+import cn.zzh.foreground_client.project.tools.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -20,14 +25,21 @@ import org.springframework.web.bind.annotation.*;
  *
  */
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping(value = "/o/user")
 public class RegisterAndLogin {
     private final static Logger logger = LoggerFactory.getLogger(RegisterAndLogin.class);
+    private final static String R_PHONE_NUMBER ="phoneNumber";
+    private final static long DAY=86400;
+    private final static long MOUTH      =        2592000;
+    private final static String JWT="receptionId";
 
     @Autowired
     private UserService userService;
     @Autowired
     private Tools tools;
+    @Autowired
+    private Redis redis;
+
 
 
     /**1：注册-请求验证码：
@@ -42,7 +54,7 @@ public class RegisterAndLogin {
      */
     @GetMapping(value = "/register/msgcode",produces =  "application/json;charset=UTF-8")
     public Result<Integer> registerGetMsgcode(@RequestParam String phoneNumber){
-        logger.info("com.controller.RegisetAndLogin.registerGetMsgcode ： phoneNumber: "+phoneNumber);
+        logger.info("com.controller.RegisetAndLogin.registerGetMsgCode ： phoneNumber: "+phoneNumber);
         //入参校验，是否纯数字和位数是否正确；
         if(tools.pohoneVertify(phoneNumber)){
             //判断电话是否没有被注册
@@ -122,7 +134,7 @@ public class RegisterAndLogin {
      *
      */
     @RequestMapping(value = "login/account",method = RequestMethod.POST,produces =  "application/json;charset=UTF-8")
-    public Result<Integer> loginAccount(@RequestParam   String phoneNumber, @RequestParam String password){
+    public Result<Integer> loginAccount(@RequestParam   String phoneNumber, @RequestParam String password,HttpServletResponse response){
         if (!tools.pohoneVertify(phoneNumber)){
             return new Result<>(false,107);
         }
@@ -139,11 +151,12 @@ public class RegisterAndLogin {
         }
         if (phoneNumber.equals(userService.selectPhoneByPwd(pwd))){
             user=userService.selectByPrimaryKey(user.getId());
-            try {
-                JwtTool.createToken(user.getId());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            redis.set(user.getId()+R_PHONE_NUMBER ,user.getPhoneNumber(),MOUTH);
+            Map<String,Object> map=new HashMap<>();
+            map.put("receptionId",user.getId());
+            String token= JwtUtil.createJWT(map);
+            response.setHeader("JWT",token);
+            redis.set(JWT+user.getId(),token,MOUTH);
             return new Result<>(true);
         }
         return new Result<>(false,108);

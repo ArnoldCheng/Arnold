@@ -14,7 +14,7 @@ public interface UserMapper {
             "select phone_number from user",
             "where password = #{password}"
     })
-    String selectPhoneByPwd (String phoneNumber);
+    String selectPhoneByPwd (String password);
 
     @Select({
             "select",

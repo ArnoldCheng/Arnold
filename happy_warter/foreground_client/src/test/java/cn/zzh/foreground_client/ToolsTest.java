@@ -1,4 +1,5 @@
 package cn.zzh.foreground_client;
+
 import cn.zzh.foreground_client.project.tools.aLiAPI.AliMessage;
 import cn.zzh.foreground_client.project.tools.normal.Phone;
 import cn.zzh.foreground_client.project.tools.redis.Redis;
@@ -10,11 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Author: 快乐水 青柠可乐

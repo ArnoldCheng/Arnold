@@ -53,8 +53,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String selectPhoneByPwd(String phoneNumber) {
-        return userMapper.selectPhoneByPwd(phoneNumber);
+    public String selectPhoneByPwd(String password) {
+        return userMapper.selectPhoneByPwd(password);
     }
 
     @Override

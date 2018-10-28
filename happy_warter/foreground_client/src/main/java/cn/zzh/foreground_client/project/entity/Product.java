@@ -1,6 +1,5 @@
 package cn.zzh.foreground_client.project.entity;
 
-import javax.validation.constraints.Null;
 import java.math.BigDecimal;
 
 public class Product {

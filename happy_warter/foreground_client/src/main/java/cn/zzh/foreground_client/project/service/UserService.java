@@ -22,7 +22,7 @@ public interface UserService {
 
     int updateByPrimaryKeySelective(User record);
 
-    String selectPhoneByPwd (String phoneNumber);
+    String selectPhoneByPwd (String password);
 
     int updateByPhoneNumberSelective(User record);
 

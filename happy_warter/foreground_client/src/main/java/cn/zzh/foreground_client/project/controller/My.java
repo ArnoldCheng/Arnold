@@ -19,10 +19,11 @@ import org.springframework.web.bind.annotation.*;
  *
  */
 @RestController
-@RequestMapping(value = "/user/my")
+@RequestMapping(value = "/i//user/my")
 public class My {
     private final static Logger logger = LoggerFactory.getLogger(My.class);
     private long now=System.currentTimeMillis();
+
     @Autowired
     UserService userService;
     @Autowired
@@ -40,11 +41,15 @@ public class My {
     @Autowired
     Redis redis;
 
-    private static final String RIdCard="idCard";
-    private static final String Rcard="card";
-    private static final String RRealName="realName";
-    private static final String RCardType="cardType";
-    private static final long Temporary=900;
+    private static final String R_ID_CARD ="idCard";
+    private static final String R_CARD ="card";
+    private static final String R_REAL_NAME ="realName";
+    private static final String R_CARD_TYPE ="cardType";
+    private static final String R_PHONE_NUMBER ="phoneNumber";
+    private static final String JWT="receptionId";
+    private final static long DAY=86400;
+    private final static long MOUTH      =        2592000;
+    private static final long TEMPORARY =900;
 
 
 
@@ -59,9 +64,11 @@ public class My {
      *
      */
     @RequestMapping(value = "/info/{id}",method = RequestMethod.GET,produces =  "application/json;charset=UTF-8")
-    public Result<User> myInfo(@PathVariable("id")long uerId){
+    public Result<User> myInfo(@PathVariable long id){
 
-        return new Result<>(true,userService.selectByPrimaryKey(uerId));
+        User user=userService.selectByPrimaryKey(id);
+        redis.set(id+R_PHONE_NUMBER,user.getPhoneNumber(),MOUTH);
+        return new Result<>(true,user);
     }
 
     /**17
@@ -119,9 +126,9 @@ public class My {
             return new Result<>(false,305);
         }
         //为输入进行缓存存入
-        redis.set(id+RIdCard,idCard,Temporary);
-        redis.set(id+Rcard,card,Temporary);
-        redis.set(id+RRealName,realName,Temporary);
+        redis.set(id+R_ID_CARD,idCard,TEMPORARY );
+        redis.set(id+R_CARD,card,TEMPORARY );
+        redis.set(id+R_REAL_NAME,realName,TEMPORARY );
         return new Result<>(true);
     }
     
@@ -135,12 +142,12 @@ public class My {
      *
      */
     @RequestMapping(value = "/info/identification/card/{id}",method = RequestMethod.POST,produces =  "application/json;charset=UTF-8")
-    public Result<Integer> identificationCard(@RequestParam String cardType, @RequestParam  String phoneNumber, @PathVariable("id")long id){
+    public Result<Integer> identificationCard(@RequestParam String cardType,  @PathVariable("id")long id){
         if(!tools.chineseVertify(cardType)){
             //卡类型输入非中文
             return new Result<>(false,306);
         }
-        redis.set(id+RCardType,cardType,Temporary);
+        redis.set(id+R_CARD_TYPE,cardType,TEMPORARY );
         return new Result<>(true);
     }
 
@@ -196,21 +203,21 @@ public class My {
     public Result<Integer> cardVertification(@PathVariable("id")long id, @RequestParam String phoneNumber, @RequestParam  String msgCode){
         //校验验证码
         if (tools.msgCodeVertify(msgCode, phoneNumber)) {
-            if(redis.hasKey(id+RIdCard)&&redis.hasKey(id+RRealName)&&redis.hasKey(id+Rcard)&&redis.hasKey(id+RCardType)){
+            if(redis.hasKey(id+R_ID_CARD)&&redis.hasKey(id+R_REAL_NAME)&&redis.hasKey(id+R_CARD)&&redis.hasKey(id+R_CARD_TYPE)){
 
                 //进行update
                 User user=new User();
-                logger.info("________RIdCard"+String.valueOf(redis.get(id+RIdCard)));
+                logger.info("________R_ID_CARD"+String.valueOf(redis.get(id+R_ID_CARD)));
                 user.setId(id);
-                user.setIdCard(redis.get(id+RIdCard).toString());
-                user.setRealName(redis.get(id+RRealName).toString());
+                user.setIdCard(redis.get(id+R_ID_CARD).toString());
+                user.setRealName(redis.get(id+R_REAL_NAME).toString());
                 user.setCreatedAt(now);
                 user.setUpdatedAt(now);
                 userService.updateByPrimaryKeySelective(user);
                 Bank bank=new Bank();
                 bank.setUserId(id);
-                bank.setCard(redis.get(id+Rcard).toString());
-                bank.setType(redis.get(id+RCardType).toString());
+                bank.setCard(redis.get(id+R_CARD).toString());
+                bank.setType(redis.get(id+R_CARD_TYPE).toString());
                 bank.setCreatedAt(now);
                 bank.setUserId(id);
                 bankService.insertSelective(bank);
@@ -234,7 +241,7 @@ public class My {
      *
      */
     @RequestMapping(value = "/info/phone/{id}",method = RequestMethod.GET,produces =  "application/json;charset=UTF-8")
-    private Result<User> phoneChange (@PathVariable("id") long id){
+    public Result<User> phoneChange (@PathVariable("id") long id){
 
         User user = userService.selectByPrimaryKey(id);
         return new Result<>(true,user);
@@ -250,17 +257,13 @@ public class My {
      *
      */
     @RequestMapping(value = "/info/phone/msgcode/{id}",method = RequestMethod.GET)
-    private Result phoneMsgcode (@PathVariable("id") long id,@RequestParam String phoneNumber){
+    public  Result phoneMsgcode (@PathVariable("id") long id,@RequestParam String phoneNumber){
         //需要填写code
-
-
-
-
 
 //入参校验，是否纯数字和位数是否正确；
         if(tools.pohoneVertify(phoneNumber)){
             //判断电话是否没有被注册
-            if(!userService.selectExitPhoneNumber(phoneNumber)){
+            if(userService.selectExitPhoneNumber(phoneNumber)){
                 //判断短信请求验证是否符合要求
 
                 switch (tools.msgCodePermission(phoneNumber)){
@@ -269,19 +272,23 @@ public class My {
                         return new Result<>(true);
 
                     case 1:
-                        return new Result<>(false,23);
+                        //请求间隔小于60秒
+                        return new Result<>(false,307);
 
                     case 2:
-                        return new Result<>(false,23);
+                        //请求次数上限
+                        return new Result<>(false,308);
 
                     default:
                         logger.info("请求验证码出现异常有误");
                         return new Result<>(false);
                 }
             }
-            return new Result<>(false,23);
+            //电话号码不存在
+            return new Result<>(false,309);
         }
-        return new Result<>(false,23);
+        //电话号码格式错误
+        return new Result<>(false,310);
     }
 
     /**24
@@ -294,18 +301,13 @@ public class My {
      *
      */
     @RequestMapping(value = "/info/phone/msgcode/verification/{id}",method = RequestMethod.POST)
-    private Result phoneVerification(@PathVariable("id") long id,@RequestParam String msgCode,@RequestParam String phoneNumber){
-        //需要code码
-
-
-
-
+    public  Result<Integer> phoneVerification(@PathVariable("id") long id, @RequestParam String msgCode, @RequestParam String phoneNumber){
 
         //校验
         if (tools.msgCodeVertify(msgCode, phoneNumber)){
-            return new Result(true);
+            return new Result<Integer>(true);
         }
-        return new Result(false);
+        return new Result<>(false,311);
 
     }
 
@@ -314,36 +316,36 @@ public class My {
      * @Description:
      * @auther: 快乐水 青柠可乐
      * @date: 上午11:16 2018/10/16 
-     * @param: [id, newPhoneNumber]
+     * @param: [id, phoneNumber]
      * @return: cn.zzh.foreground_client.project.entity.Result
      *
      */
     @RequestMapping(value = "/info/phone/new/msgcode/{id}",method = RequestMethod.GET)
-    private Result phoneNewMsgcode(@PathVariable("id") long id,@RequestParam  String newPhoneNumber){
-        if(tools.pohoneVertify(newPhoneNumber)){
+    public  Result phoneNewMsgcode(@PathVariable("id") long id,@RequestParam  String phoneNumber){
+        if(tools.pohoneVertify(phoneNumber)){
             //判断电话是否没有被注册
-            if(!userService.selectExitPhoneNumber(newPhoneNumber)){
+            if(!userService.selectExitPhoneNumber(phoneNumber)){
                 //判断短信请求验证是否符合要求
 
-                switch (tools.msgCodePermission(newPhoneNumber)){
+                switch (tools.msgCodePermission(phoneNumber)){
                     case 0:
-                        tools.sendAliMsg(newPhoneNumber);
+                        redis.set(id+R_PHONE_NUMBER,phoneNumber,TEMPORARY );
+                        tools.sendAliMsg(phoneNumber);
                         return new Result<>(true);
-
                     case 1:
-                        return new Result<>(false,25);
+                        return new Result<>(false,307);
 
                     case 2:
-                        return new Result<>(false,25);
+                        return new Result<>(false,308);
 
                     default:
                         logger.info("请求验证码出现异常有误");
                         return new Result<>(false);
                 }
             }
-            return new Result<>(false,25);
+            return new Result<>(false,309);
         }
-        return new Result<>(false,25);
+        return new Result<>(false,310);
 
     }
 
@@ -357,13 +359,17 @@ public class My {
      *
      */
     @RequestMapping(value = "/info/phone/new/msgcode/verification/{id}",method =RequestMethod.POST)
-    private Result phoneNewVerification(@PathVariable("id") long id ,@RequestParam String msgCode,String phoneNumber){
+    public  Result<Integer> phoneNewVerification(@PathVariable("id") long id , @RequestParam String msgCode){
         //校验验证码
-        if(tools.msgCodeVertify(msgCode,phoneNumber)){
-            userService.updateByPhoneNumberSelective(new User(phoneNumber));
-            return new Result(true);
+        if(!redis.hasKey(id+R_PHONE_NUMBER)){
+            return new Result<>(false,312);
         }
-        return new Result(true);
+        String phoneNumber=redis.get(id+R_PHONE_NUMBER).toString();
+        if(tools.msgCodeVertify(msgCode,phoneNumber)){
+            userService.updateByPrimaryKeySelective(new User(id,phoneNumber));
+            return new Result<>(true);
+        }
+        return new Result<>(false,311);
     }
 
 
@@ -372,35 +378,39 @@ public class My {
      * @Description:
      * @auther: 快乐水 青柠可乐
      * @date: 上午11:16 2018/10/16 
-     * @param: [id, oldPassword, newPassword, comfirmPassword]
+     * @param: [id, oldPassword, firstPassword, secondPassword]
      * @return: cn.zzh.foreground_client.project.entity.Result
      *
      */
     @RequestMapping(value = "/setting/password/{id}",method =RequestMethod.POST)
-    private Result passwordSetting(@PathVariable("id") long id, @RequestParam String oldPassword, @RequestParam String newPassword, @RequestParam String comfirmPassword){
+    public  Result passwordSetting(@PathVariable("id") long id, @RequestParam String oldPassword, @RequestParam String firstPassword, @RequestParam String secondPassword){
         User user=userService.selectByPrimaryKey(id);
         String salt=user.getSalt();
-        if(tools.md5(oldPassword + salt).equals(user.getPassword())){
-            switch (tools.pwdVertify(newPassword,comfirmPassword)){
+
+        if(user.getPhoneNumber().equals(userService.selectPhoneByPwd(tools.md5(oldPassword+salt)))){
+            switch (tools.pwdVertify(firstPassword,secondPassword)){
                 case 0:
-                    String newsalt=tools.uuidGenerator();
-                    String pwd=tools.md5(newPassword+salt);
+                    String newSalt=tools.uuidGenerator();
+                    String pwd=tools.md5(firstPassword+newSalt);
                     User user1=new User();
-                    user.setId(id);
-                    user.setPassword(pwd);
-                    user.setSalt(salt);
-                    user.setUpdatedAt(now);
-                    userService.updateByPrimaryKeySelective(user);
+                    user1.setId(id);
+                    user1.setPassword(pwd);
+                    user1.setSalt(newSalt);
+                    user1.setUpdatedAt(now);
+                    userService.updateByPrimaryKeySelective(user1);
                     return new Result<>(true);
                 case 1:
-                    return new Result<>(false,105);
+                    //密码长度错误
+                    return new Result<>(false,313);
                 case 2:
-                    return new Result<>(false,106);
+                    //两次密码不一致
+                    return new Result<>(false,314);
                 default:
                     return new Result<>(false);
             }
         }
-        return new Result<>(false,27);
+        //密码错误
+        return new Result<>(false,315);
     }
 
     /**28 需要补充
@@ -413,10 +423,9 @@ public class My {
      *
      */
     @RequestMapping(value = "/setting/logout/{id}",method =RequestMethod.GET)
-    private Result logout(@PathVariable("id") long id){
-
-
+    public  Result logout(@PathVariable long id){
         //退出 删除jwt
+        redis.del(JWT+id);
         return new Result(true);
     }
 
@@ -431,7 +440,7 @@ public class My {
      *
      */
     @RequestMapping(value = "/messages/{id}",method =RequestMethod.GET)
-    private Result<java.util.List<Message>> messages(@PathVariable("id")long id){
+    public  Result<java.util.List<Message>> messages(@PathVariable long id){
         java.util.List<Message> messages=messageService.selectByUserIdList(id);
         return new Result<>(true,messages);
     }
@@ -447,9 +456,9 @@ public class My {
      *
      */
     @RequestMapping(value = "/investment/{id}",method =RequestMethod.GET)
-    private Result myInvestment(@PathVariable("id") long id){
+    public  Result<java.util.List<Compact>> myInvestment(@PathVariable  long id){
         java.util.List<Compact> compacts=compactService.selectListByUserId(id);
-        return new Result(true);
+        return new Result<>(true,compacts);
     }
 
 
@@ -462,8 +471,8 @@ public class My {
      * @return: cn.zzh.foreground_client.project.entity.Result
      *
      */
-    @RequestMapping(value = "/investment/book/{id},compactingId={compactingId}",method =RequestMethod.GET)
-    private Result investmentBook( @PathVariable("id") long id,  long compactingId){
+    @RequestMapping(value = "/investment/book/{id}",method =RequestMethod.POST)
+    public  Result investmentBook( @PathVariable long id, @RequestParam  long compactingId){
         //调用接口
         return  new Result(true);
     }
@@ -478,8 +487,8 @@ public class My {
      * @return: cn.zzh.foreground_client.project.entity.Result
      *
      */
-    @RequestMapping(value = "/investment/debook/{id},compactingId={compactingId}",method =RequestMethod.GET)
-    private Result investmentDebook(@PathVariable("id") long id,  long compactingId){
+    @RequestMapping(value = "/investment/debook/{id}",method =RequestMethod.POST)
+    public  Result investmentDebook(@PathVariable long id, @RequestParam  long compactingId){
         //调用接口
         return new Result(true);
     }
@@ -495,7 +504,7 @@ public class My {
      *
      */
     @RequestMapping(value = "/transaction/record/{id}",method =RequestMethod.GET)
-    private Result<java.util.List<Deal>> transactionRecord(@PathVariable("id") long id){
+    public  Result<java.util.List<Deal>> transactionRecord(@PathVariable("id") long id){
         java.util.List<Deal> deals=dealService.selectByUserId(id);
         return new Result<>(true,deals);
     }
@@ -511,7 +520,7 @@ public class My {
      *
      */
     @RequestMapping(value = "/bank/{id}",method =RequestMethod.GET)
-    private Result<java.util.List<Bank>> myBank(@PathVariable("id") long id){
+    public  Result<java.util.List<Bank>> myBank(@PathVariable("id") long id){
         java.util.List<Bank> banks = bankService.selectByUserId(id);
 
         return new Result<>(true,banks);
@@ -527,13 +536,12 @@ public class My {
      *
      */
     @RequestMapping(value = "/bank/info/{id}",method =RequestMethod.GET)
-    private Result<User> bankMyInfo(@PathVariable("id") long userId){
-
-        return new Result<>(true,userService.selectByPrimaryKey(userId));
+    public  Result<User> bankMyInfo(@PathVariable long id){
+        return new Result<>(true,userService.selectByPrimaryKey(id));
     }
 
     
-    /**36 :再补充（需要增加一个接口）
+    /**36.1 :再补充（需要增加一个接口）
      *1.4.8.3 提交卡号
      * @Description:
      * @auther: 快乐水 青柠可乐
@@ -543,9 +551,97 @@ public class My {
      *
      */
     @RequestMapping(value = "/bank/card/{id}",method =RequestMethod.POST)
-    private Result bankCard(@PathVariable("id")long id,  long cardId){
-        //update
+    public Result bankCard(@PathVariable long id, @RequestParam String card, @RequestParam String cardType){
+        if(bankService.selectAccountByCard(card)>0){
+            return new Result<>(false,305);
+        }
+        redis.set(id+R_CARD,card,TEMPORARY );
+        redis.set(id+R_CARD_TYPE,cardType,TEMPORARY);
         return new Result(true);
+    }
+
+    /**36.2
+     * @Description: 提交电话
+     * @auther: 快乐水 青柠可乐
+     * @date: 下午4:17 2018/10/16
+     * @param: [id, card]
+     * @return: cn.zzh.foreground_client.project.entity.Result
+     *
+     */
+    @RequestMapping(value = "/bank/card/phone/{id}",method =RequestMethod.POST)
+    public Result<Integer> bankCardPhone(@PathVariable long id, @RequestParam String phoneNumber){
+        //参数校验
+        if(!tools.pohoneVertify(phoneNumber)){
+            //电话格式错误
+            return new Result<>(false,310);
+        }
+        //电话是否存在
+        if(!userService.selectExitPhoneNumber(phoneNumber)){
+            //电话不存在
+            return new Result<>(false,309);
+        }
+        //电话放入缓存
+        redis.set(id+R_PHONE_NUMBER,phoneNumber,TEMPORARY);
+        return new Result<Integer>(true);
+    }
+
+    /**36.3
+     *
+     * @Description: 获得验证码
+     * @auther: 快乐水 青柠可乐
+     * @date: 下午4:17 2018/10/27
+     * @param: [id, card]
+     * @return: cn.zzh.foreground_client.project.entity.Result
+     *
+     */
+    @RequestMapping(value = "/bank/card/phone/msgcode/{id}",method =RequestMethod.POST)
+    public  Result bankCardMsg(@PathVariable long id){
+        String phoneNumber=redis.get(id+R_PHONE_NUMBER).toString();
+        switch (tools.msgCodePermission(phoneNumber)){
+            case 0:
+                tools.sendAliMsg(phoneNumber);
+                return new Result<>(true);
+            case 1:
+                //请求间隔小于60秒
+                return new Result<>(false,307);
+
+            case 2:
+                //请求次数上限
+                return new Result<>(false,308);
+
+            default:
+                logger.info("请求验证码出现异常有误");
+                return new Result<>(false);
+        }
+    }
+
+    /**36.4
+     *
+     * @Description: 校验验证码
+     * @auther: 快乐水 青柠可乐
+     * @date: 下午4:18 2018/10/27
+     * @param: [id, card]
+     * @return: cn.zzh.foreground_client.project.entity.Result
+     *
+     */
+    @RequestMapping(value = "/bank/card/phone/msgcode/verification/{id}",method =RequestMethod.POST)
+    public  Result bankCardVertify(@PathVariable long id,@RequestParam String msgCode){
+        if(!redis.hasKey(id+R_PHONE_NUMBER)||!redis.hasKey(id+R_CARD_TYPE)||!redis.hasKey(id+R_CARD)){
+            return new Result<>(false,312);
+        }
+        String phoneNumber=redis.get(id+R_PHONE_NUMBER).toString();
+        if(tools.msgCodeVertify(msgCode,phoneNumber)){
+            Bank bank=new Bank();
+            bank.setUserId(id);
+            bank.setCard(redis.get(id+R_CARD).toString());
+            bank.setType(redis.get(id+R_CARD_TYPE).toString());
+            bank.setCreatedAt(now);
+            bank.setUpdatedAt(now);
+            bankService.insertSelective(bank);
+            redis.del(id+R_CARD);
+            return new Result<>(true);
+        }
+        return new Result<>(false,311);
     }
 
 
@@ -558,10 +654,25 @@ public class My {
      * @return: cn.zzh.foreground_client.project.entity.Result
      *
      */
-    @RequestMapping(value = "/bank/card/msgcode/{id}",method =RequestMethod.GET)
-    private Result bankMsgcode(@PathVariable("id") long id,@RequestParam String phoneNumber){
-        //短信请求同
-        return new Result(true);
+    @RequestMapping(value = "/bank/card/debook/msgcode/{id}",method =RequestMethod.GET)
+    public  Result bankMsgcode(@PathVariable long id,String phoneNumber){
+        switch (tools.msgCodePermission(phoneNumber)){
+            case 0:
+                tools.sendAliMsg(phoneNumber);
+                redis.set(id+R_PHONE_NUMBER,phoneNumber,TEMPORARY);
+                return new Result<>(true);
+            case 1:
+                //请求间隔小于60秒
+                return new Result<>(false,307);
+
+            case 2:
+                //请求次数上限
+                return new Result<>(false,308);
+
+            default:
+                logger.info("请求验证码出现异常有误");
+                return new Result<>(false);
+        }
     }
 
 
@@ -574,10 +685,23 @@ public class My {
      * @return: cn.zzh.foreground_client.project.entity.Result
      *
      */
-    @RequestMapping(value = "/bank/card/msgcode/{id}",method =RequestMethod.DELETE)
-    private Result bankMsgcodeVertify(@PathVariable("id") long id, @RequestParam      String msgCode, @RequestParam String card){
-        //短信验证同
-        return new Result(true);
+    @RequestMapping(value = "/bank/card/debook/msgcode/verification/{id}",method =RequestMethod.DELETE)
+    public  Result bankMsgcodeVertify(@PathVariable("id") long id, @RequestParam  String msgCode, @RequestParam long bankId){
+        if (!redis.hasKey(id+R_PHONE_NUMBER)){
+            //输入超时
+            return new Result<>(false,312);
+        }
+        if (bankService.selectUserIdByBankId(bankId)==id){
+            if(tools.msgCodeVertify(msgCode,redis.get(id+R_PHONE_NUMBER).toString())){
+                bankService.deleteByPrimaryKey(bankId);
+                return new Result<>(true);
+            }
+            return new Result<>(false,311);
+        }
+        //该银行卡非该用户所有
+        return new Result<>(false,316);
+
+
     }
 
 
@@ -591,9 +715,9 @@ public class My {
      *
      */
     @RequestMapping(value = "/idea/{id}",method =RequestMethod.POST)
-    private Result myIdea(@PathVariable("id") long id,@RequestParam String content){
+    public  Result myIdea(@PathVariable long id,@RequestParam String content){
         Idea idea=new Idea();
-        idea.setId(id);
+        idea.setUserId(id);
         idea.setContent(content);
         idea.setCreatedAt(now);
         idea.setUpdatedAt(now);

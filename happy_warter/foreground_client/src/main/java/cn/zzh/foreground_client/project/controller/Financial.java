@@ -1,4 +1,5 @@
 package cn.zzh.foreground_client.project.controller;
+
 import cn.zzh.foreground_client.project.entity.Bank;
 import cn.zzh.foreground_client.project.entity.Product;
 import cn.zzh.foreground_client.project.entity.Result;
@@ -22,9 +23,12 @@ import java.util.List;
  *
  */
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping(value = "/i/user")
 public class Financial {
     private final static Logger logger = LoggerFactory.getLogger(Financial.class);
+    private final static String R_PHONE_NUMBER ="phoneNumber";
+    private final static long DAY=86400;
+    private final static long MOUTH      =        2592000;
     @Autowired
     private ProductService productService;
     @Autowired
@@ -103,8 +107,11 @@ public class Financial {
      */
     @RequestMapping(value = "/products/determination/{id}",method = RequestMethod.POST,produces =  "application/json;charset=UTF-8")
     public Result<Integer> productsDetermination
-    (@PathVariable("id") long userId, @RequestParam long productId, @RequestParam BigDecimal moneyAmount,@RequestParam String paymentWay){
-        //需要code
+    (@PathVariable long id, @RequestParam long productId, @RequestParam BigDecimal moneyAmount,@RequestParam String paymentWay){
+        
+
+
+
 
 
 
@@ -123,7 +130,7 @@ public class Financial {
             return new Result<>(false,202);
         }
         //判断是否超过用户余额
-        User user=userService.selectByPrimaryKey(userId);
+        User user=userService.selectByPrimaryKey(id);
         int k=moneyAmount.compareTo(user.getBalance());
         if (k>0){
             //金额超过用户余额
@@ -143,10 +150,7 @@ public class Financial {
      *
      */
     @RequestMapping(value = "/products/payment/msgcode/{id}",method = RequestMethod.GET)
-    public Result productPaymentMsgcode(@PathVariable("id")long userId,@RequestParam   String phoneNumber){
-        //需要code
-
-
+    public Result productPaymentMsgcode(@PathVariable long id,@RequestParam   String phoneNumber){
         //入参校验，是否纯数字和位数是否正确；
         if(tools.pohoneVertify(phoneNumber)){
             //判断电话是否存在

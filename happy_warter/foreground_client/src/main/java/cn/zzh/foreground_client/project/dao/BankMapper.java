@@ -28,10 +28,33 @@ public interface BankMapper {
     })
     List<Bank> selectByUserId(Long userId);
 
+    /**
+     *
+     * @Description:
+     * @auther: 快乐水 青柠可乐
+     * @date: 下午5:39 2018/10/27
+     * @param: [card]
+     * @return: int
+     *
+     */
     @Select({
             "select count(*) from bank where card=#{card}"
     })
     int selectAccountByCard(String card);
+
+    /**
+     *
+     * @Description:
+     * @auther: 快乐水 青柠可乐
+     * @date: 下午5:39 2018/10/27
+     * @param: [id]
+     * @return: long
+     *
+     */
+    @Select({
+            "select user_id from bank where id=#{id}"
+    })
+    long selectUserIdByBankId(long id);
 
 
     /**:

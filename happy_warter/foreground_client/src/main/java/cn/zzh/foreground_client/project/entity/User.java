@@ -129,6 +129,11 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
+    public User(long id,String phoneNumber){
+        this.id=id;
+        this.phoneNumber=phoneNumber;
+    }
+
     public User(String phoneNumber,String password,String salt){
         this.phoneNumber=phoneNumber;
         this.password=password;
